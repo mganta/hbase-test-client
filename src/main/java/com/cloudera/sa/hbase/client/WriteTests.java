@@ -6,7 +6,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.io.hfile.Compression.Algorithm;
 
 public class WriteTests {
@@ -14,10 +13,9 @@ public class WriteTests {
     private static boolean INITIALIZE_AT_FIRST = true;
     private static int THREAD_COUNT = 20;
     private static int REGION_COUNT = 26;
-    private static int HBASE_POOL_COUNT = 8;
     private static String TABLE_NAME="Table1";
     private static String COLUMN_FAMILY="family1";
-    private static HTablePool pool;
+
 
     private void createTable(HBaseAdmin admin) throws IOException {
         HTableDescriptor desc = new HTableDescriptor(TABLE_NAME.getBytes());
@@ -51,15 +49,11 @@ public class WriteTests {
             createTable(admin);
             System.out.println("Created Table " + TABLE_NAME);
         }
-
-         pool = new HTablePool(config, HBASE_POOL_COUNT);
          
          for(int i=0; i < THREAD_COUNT; i++) {
-        	 WorkerThread t = new WorkerThread(pool, i, TABLE_NAME, COLUMN_FAMILY);
+        	 WorkerThread t = new WorkerThread(config, i, TABLE_NAME, COLUMN_FAMILY);
         	 t.start();
          }
-
-       pool.close();
        admin.close();
     }
 }
